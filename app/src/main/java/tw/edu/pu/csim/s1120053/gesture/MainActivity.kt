@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.draggable
@@ -31,7 +32,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,6 +47,7 @@ class MainActivity : ComponentActivity() {
                     Tap()
                     Drag_Horizontal()
                     Drag_Vertical()
+                    Ghost()
                 }
             }
         }
@@ -147,7 +151,7 @@ fun Drag_Horizontal() {
     Text(
         text = "水平拖曳",
         modifier = Modifier
-            .offset { IntOffset(offsetX.toInt(), 150) }
+            .offset { IntOffset(offsetX.toInt(), 215) }
             .draggable(
                 orientation= Orientation.Horizontal,
                 state = rememberDraggableState{ delta ->
@@ -170,4 +174,44 @@ fun Drag_Vertical() {
                 }
             )
     )
+}
+@Composable
+fun Ghost() {
+    var offset1 by remember { mutableStateOf(Offset.Zero) }
+    var offset2 by remember { mutableStateOf(Offset.Zero) }
+    var height by remember { mutableStateOf(0) }
+    var width by remember { mutableStateOf(0) }
+    Box(modifier = Modifier.fillMaxSize()){
+        Box(modifier = Modifier
+            .offset { IntOffset(offset1.x.toInt(), offset1.y.toInt()) }
+            .pointerInput(Unit) {
+                detectDragGestures { change, dragAmount ->
+                    offset1 += dragAmount
+                }
+            }
+            .onGloballyPositioned { coordinates ->
+                height = coordinates.size.height
+                width = coordinates.size.width
+            }
+        ){
+            Image(
+                painter = painterResource(id = R.drawable.ghost1),
+                contentDescription = "精靈1",
+            )
+        }
+        Box(modifier = Modifier
+            .offset { IntOffset(offset2.x.roundToInt(), offset2.y.roundToInt()) }
+            .pointerInput(Unit) {
+                detectDragGestures { change, dragAmount ->
+                    offset2 += dragAmount
+                }
+            }
+        ){
+            Image(
+                painter = painterResource(id = R.drawable.ghost2),
+                contentDescription = "精靈2",
+            )
+        }
+
+    }
 }
